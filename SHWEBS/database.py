@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from .config import settings
+from SHWEBS.config import settings
 """Файл для соединения с БД"""
 
 
@@ -15,3 +15,12 @@ Session = sessionmaker(
     autoflush=False,
     bind=engine,
 )
+
+
+def get_session() -> Session:
+    session = Session()
+    try:
+        yield session
+    finally:
+        session.close()
+

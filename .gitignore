@@ -116,3 +116,6 @@ secret_*
 
 # Apple cache
 .DS_Store
+
+# Database
+*.db
