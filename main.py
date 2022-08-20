@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
 from SHWEBS.database import engine, get_session
-from SHWEBS.models import Base, Shwebs
+from SHWEBS.models import Base
 
 
 Base.metadata.create_all(engine)
