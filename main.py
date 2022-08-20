@@ -9,7 +9,7 @@ app = FastAPI()
 
 
 @app.post("/")
-async def root(sessioin: Session = Depends(get_session)):
+async def root(session: Session = Depends(get_session)):
     """Авторизация"""
     raise NotImplementedError
 
