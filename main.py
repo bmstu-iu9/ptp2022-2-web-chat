@@ -1,32 +1,52 @@
+from typing import Tuple
+
 from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
+
+from hashlib import sha256
+
 from SHWEBS.database import engine, get_session
-from SHWEBS.models import Base
+from SHWEBS import models, schema
+from SHWEBS.config import settings
 
 
-Base.metadata.create_all(engine)
+models.Base.metadata.create_all(engine)
 app = FastAPI()
 
 
 @app.post("/")
-async def root(session: Session = Depends(get_session)):
+async def login(session: Session = Depends(get_session)):
     """Авторизация"""
     raise NotImplementedError
 
 
-@app.get("/registration")
-async def root():
+@app.post("/registration", response_model=schema.User)
+async def add_user(username: str,
+                   password1: str,
+                   password2: str,
+                   firstname: str,
+                   lastname: str,
+                   session: Session = Depends(get_session)):
     """Регистрация"""
-    raise NotImplementedError
+    def beautiful_parameters(username: str, firstname: str, lastname: str) -> Tuple[str, str, str]:
+        return username.lower(), firstname.lower().capitalize(), lastname.lower().capitalize()
 
+    username, firstname, lastname = beautiful_parameters(username, firstname, lastname)
 
-@app.get("/friends")
-async def root():
-    """Друзья"""
-    raise NotImplementedError
+    if session.query(models.User).filter_by(username=username).count():
+        return None
+    if password1 != password2:
+        return None
 
+    hashed_password = sha256(password1.encode()).hexdigest()
 
-@app.get("/messanger")
-async def root():
-    """Сообщения"""
-    raise NotImplementedError
+    new_user = models.User(username=username,
+                           hashed_password=hashed_password,
+                           firstname=firstname,
+                           lastname=lastname)
+
+    session.add(new_user)
+    session.commit()
+    session.refresh(new_user)
+
+    return new_user
