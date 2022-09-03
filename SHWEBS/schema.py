@@ -1,8 +1,11 @@
 from pydantic import BaseModel
 
 
-class Shwebs(BaseModel):
-    raise NotImplementedError
-    # id: int
-    # firstname: str
-    # lastname: str
+class User(BaseModel):
+    username: str
+    hashed_password: str
+    firstname: str
+    lastname: str
+
+    class Config:
+        orm_mode = True
