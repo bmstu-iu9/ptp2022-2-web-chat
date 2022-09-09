@@ -1,6 +1,6 @@
 from typing import Tuple
 
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from hashlib import sha256
@@ -14,10 +14,23 @@ models.Base.metadata.create_all(engine)
 app = FastAPI()
 
 
-@app.post("/")
-async def login(session: Session = Depends(get_session)):
+@app.get("/login", response_model=schema.User)
+async def login(username: str,
+                password: str,
+                session: Session = Depends(get_session)):
     """Авторизация"""
-    raise NotImplementedError
+    hashed_password = sha256(password.encode()).hexdigest()
+
+    if session.query(models.User).filter_by(username=username).count():
+        user = session.get(models.User, username)
+
+        if user.hashed_password != hashed_password:
+            raise HTTPException(status_code=404, detail="Incorrect password")
+
+        return user
+
+    raise HTTPException(status_code=400, detail="User not found")
+
 
 
 @app.post("/registration", response_model=schema.User)
@@ -34,9 +47,9 @@ async def add_user(username: str,
     username, firstname, lastname = beautiful_parameters(username, firstname, lastname)
 
     if session.query(models.User).filter_by(username=username).count():
-        return None
+        raise HTTPException(status_code=404, detail="User is already exists")
     if password1 != password2:
-        return None
+        raise HTTPException(status_code=400, detail="Check that passwords are written correctly")
 
     hashed_password = sha256(password1.encode()).hexdigest()
 
