@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Registration</title>
+	<link rel="stylesheet" type="text/css" href="css/registration.css">
+</head>
+<body>
+	<header class="header">
+		<div class="logo">
+
+		</div>
+		<div class="reg">
+			<p>Регистрация</p>
+		</div>
+		<div class="login">
+			<form action="#">
+				<input type="text" class="action" pattern="[A-z0-9_]{3,20}"  name="login" placeholder="Логин" required><br>
+				<input type="text" name="name" pattern="[А-яёЁ]{1,20}" class="action" placeholder="Имя" required> <br>
+				<input type="text" name="surname" pattern="[А-яёЁ]{1,20}" class="action" placeholder="Фамилия" required> <br>
+				<input type="text" maxlength="30" pattern="[A-z0-9_]{8,20}" name="password" class="action" placeholder="Пароль" required> <br>
+				<input type="text" maxlength="30" pattern="[A-z0-9_]{8,20}" name="pass" class="action" placeholder="Повторный пароль" required> <br>
+				<input type="button" class="btn" value="Зарегестрироваться" onclick="window.location.href = 'file:///C:/Users/user/Desktop/1курс/практика/web/menu.html'"/>
+
+			</form>
+
+		</div>
+	</header>
+
+</body>
+</html>
