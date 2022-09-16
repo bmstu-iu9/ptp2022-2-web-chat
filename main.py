@@ -40,6 +40,18 @@ async def login(session: Session = Depends(get_session)):
     raise NotImplementedError
 
 
+@app.get("/registration")
+async def registration(request: Request):
+    """Страница регистрации"""
+    return templates.TemplateResponse(
+        'registration.html',
+        {
+            'request': request,
+            'app_name': settings.app_name,
+        }
+    )
+
+
 @app.post("/registration", response_model=schema.User)
 async def add_user(username: str,
                    password1: str,

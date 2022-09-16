@@ -21,9 +21,11 @@
 					<input type="password" maxlength="30" class="password" name="password" placeholder="Пароль" required> <br>
 					<button type="submit" class="btn" onclick="window.location.href = 'menu.html';">Войти</button>
 				</form>
-				<div>
-					<a href="registration.html" class="link">Зарегестрироваться</a>
-				</div>
+			</div>
+			<div>
+				<form action="{{ url_for('login') }}" method="get">
+					<button class="ui teal basic button" type="submit">Зарегистрироваться</button>
+				</form>
 			</div>
 
 		</div>
