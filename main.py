@@ -1,6 +1,12 @@
 from typing import Tuple
 
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, Request, Form
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from fastapi.responses import RedirectResponse
+
+from starlette import status as st
+
 from sqlalchemy.orm import Session
 
 from hashlib import sha256
@@ -12,6 +18,20 @@ from SHWEBS.config import settings
 
 models.Base.metadata.create_all(engine)
 app = FastAPI()
+app.mount('/static', StaticFiles(directory='static'), name='static')
+templates = Jinja2Templates(directory='templates')
+
+
+@app.get("/")
+async def home(request: Request):
+    """Главная страница"""
+    return templates.TemplateResponse(
+        'home.html',
+        {
+            'request': request,
+            'app_name': settings.app_name,
+        }
+    )
 
 
 @app.post("/")
