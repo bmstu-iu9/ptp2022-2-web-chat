@@ -1,0 +1,84 @@
+body{
+	padding: 0;
+	margin: 0;
+}
+
+.new{
+	color:white;
+	font-size:35px;
+	font-family: 'Inter';
+	font-weight: normal;
+	text-align: center;
+}
+
+
+
+.link{
+	text-decoration: none;
+	color: white;
+	text-align: center;
+	display: flex;
+	font-size:20px;
+	font-family: 'Inter';
+	font-weight: normal;
+	padding-left: 205px;
+	margin-bottom: 50px;
+}
+
+.header{
+	background:#6F659C;
+	opacity: 0.92;
+	padding-top: 474px;
+	padding-bottom: 30px;
+}
+
+.container{
+	margin: 0 auto;
+	text-align: center;
+}
+
+.offer{
+	width: 619px;
+	margin: 0 auto;
+}
+.login{
+	background: #4C4375;
+	height: 81px;
+	width: 619px;
+	border: 0;
+	border-radius: 20px;
+	font-size: 25px;
+	font-family: 'Inter';
+	font-weight: normal;
+	padding-left: 20px;
+}
+
+.password{
+	background: #4C4375;
+	height: 81px;
+	width: 619px;
+	border: 0;
+	border-radius: 20px;
+	font-size: 25px;
+	font-family: 'Inter';
+	font-weight: normal;
+	margin-top: 32px;
+	padding-left: 20px;
+}
+
+.btn{
+	background: #4C4375;
+	height: 81px;
+	width: 269px;
+	border: 0;
+	border-radius: 20px;
+	font-size: 32px;
+	font-family: 'Inter';
+	font-weight: normal;
+	color:white;
+	margin-top: 50px;
+	cursor: pointer;
+	margin-bottom: 30px;
+}
+
+html { overflow:  hidden; }
