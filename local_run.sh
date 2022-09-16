@@ -1,4 +1,4 @@
 #скрипт для тестирования
 uvicorn main:app \
     --reload  \
-    --port 10000
+    --port 8000
