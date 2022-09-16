@@ -8,7 +8,11 @@ body{
 	opacity: 0.92;
 	padding-top: 474px;
 	padding-bottom: 30px;
+	min-height: 500px;
+    min-width: 1024px;
 }
+html{ overflow:  hidden; }
+
 
 .action{
 	background: #4C4375;
