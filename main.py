@@ -7,6 +7,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.responses import RedirectResponse
+
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 
@@ -58,17 +59,19 @@ def create_access_token(data: dict, expires_delta: Union[timedelta, None] = None
     return encoded_jwt
 
 
-@app.get("/get_user", response_model=models.User)
+@app.get("/get_user", response_model=schemas.User)
 async def get_user(username: str, session: Session = Depends(get_session)):
     user = session.query(models.User).filter_by(username=username).first()
     if not user:
         return None
     return user
 
+
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
-@app.get("/auth_user", response_model=models.User)
+
+@app.get("/auth_user", response_model=schemas.User)
 async def authenticate_user(username: str, password: str):
     hashed_password = sha256(password.encode()).hexdigest()
     user = get_user(username=username)
@@ -79,7 +82,7 @@ async def authenticate_user(username: str, password: str):
     return user
 
 
-@app.get("/users/me", response_model=models.User)
+@app.get("/users/me", response_model=schemas.User)
 async def get_current_user(token: str = Depends(oauth2_scheme)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -115,7 +118,6 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
         data={"sub": user.username}, expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
-
 
 
 @app.get("/registration")
