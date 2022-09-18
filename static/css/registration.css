@@ -1,6 +1,8 @@
 body{
 	padding: 0;
 	margin: 0;
+	background: #6F659C;
+	opacity: 0.92;
 }
 
 .header{
@@ -11,7 +13,7 @@ body{
 	min-height: 500px;
     min-width: 1024px;
 }
-html{ overflow:  hidden; }
+
 
 
 .action{
