@@ -3,7 +3,7 @@ from pydantic import BaseSettings
 
 
 class Settings(BaseSettings):
-    database_url: str = 'sqlite:///./sql_app.db'
+    database_url: str = 'postgresql+asyncpg://postgresql:palm@5432/postgres'
     app_name: str = 'SHWEBS'
 
 
