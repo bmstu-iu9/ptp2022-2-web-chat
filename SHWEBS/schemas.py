@@ -8,7 +8,7 @@ class User(BaseModel):
     hashed_password: str
     firstname: str
     lastname: str
-    active: bool
+    is_active: bool
 
     class Config:
         orm_mode = True

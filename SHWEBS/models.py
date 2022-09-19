@@ -13,4 +13,4 @@ class User(Base):
     hashed_password = sa.Column(sa.String(64), unique=False)
     firstname = sa.Column(sa.String(20), unique=False)
     lastname = sa.Column(sa.String(20), unique=False)
-    active = sa.Column(sa.Boolean, default=False)
+    is_active = sa.Column(sa.Boolean, default=False)

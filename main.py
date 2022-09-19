@@ -33,7 +33,6 @@ app.mount('/static', StaticFiles(directory='static'), name='static')
 templates = Jinja2Templates(directory='templates')
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 @app.get("/")
@@ -60,25 +59,23 @@ def create_access_token(data: dict, expires_delta: Union[timedelta, None] = None
 
 
 @app.get("/get_user", response_model=schemas.User)
-async def get_user(username: str, session: Session = Depends(get_session)):
-    user = session.query(models.User).filter_by(username=username).first()
-    if not user:
-        return None
-    return user
-
-
-def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
+async def get_user(username: str):
+    with Session(engine) as session:
+        user = session.query(models.User).filter_by(username=username).first()
+        if not user:
+            return None
+        return user
 
 
 @app.get("/auth_user", response_model=schemas.User)
 async def authenticate_user(username: str, password: str):
     hashed_password = sha256(password.encode()).hexdigest()
-    user = get_user(username=username)
+    user = await get_user(username=username)
     if user is None:
         raise HTTPException(status_code=400, detail="User not found")
-    if not verify_password(hashed_password, user.hashed_password):
+    if user.hashed_password != hashed_password:
         raise HTTPException(status_code=400, detail="Invalid password")
+
     return user
 
 
@@ -97,16 +94,17 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         token_data = TokenData(username=username)
     except JWTError:
         raise credentials_exception
-    user = get_user(username=token_data.username)
+    user = await get_user(username=token_data.username)
     if user is None:
         raise credentials_exception
     return user
 
 
 @app.post("/token")
-async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+async def login(form_data: OAuth2PasswordRequestForm = Depends(),
+                session: Session = Depends(get_session)):
     """Авторизация"""
-    user = authenticate_user(form_data.username, form_data.password)
+    user = await authenticate_user(form_data.username, form_data.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -117,6 +115,11 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     access_token = create_access_token(
         data={"sub": user.username}, expires_delta=access_token_expires
     )
+
+    user.active = True
+    session.commit()
+    session.refresh(user)
+
     return {"access_token": access_token, "token_type": "bearer"}
 
 
