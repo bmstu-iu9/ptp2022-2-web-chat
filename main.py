@@ -17,7 +17,7 @@ from sqlalchemy.orm import Session
 
 from hashlib import sha256
 
-from SHWEBS.database import engine, get_session
+from SHWEBS.database import engine, get_db, SessionLocal
 from SHWEBS import models, schemas
 from SHWEBS.config import settings
 from SHWEBS.schemas import TokenData
@@ -102,7 +102,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
 
 @app.post("/token")
 async def login(form_data: OAuth2PasswordRequestForm = Depends(),
-                session: Session = Depends(get_session)):
+                session: Session = Depends(get_db)):
     """Авторизация"""
     user = await authenticate_user(form_data.username, form_data.password)
     if not user:
@@ -115,10 +115,8 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(),
     access_token = create_access_token(
         data={"sub": user.username}, expires_delta=access_token_expires
     )
-
-    user.active = True
+    user.is_active = True
     session.commit()
-    session.refresh(user)
 
     return {"access_token": access_token, "token_type": "bearer"}
 
