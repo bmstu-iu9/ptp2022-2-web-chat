@@ -1,6 +1,7 @@
 from typing import Tuple
 from datetime import datetime, timedelta
 from typing import Union
+import os
 
 from fastapi import FastAPI, Depends, Request, HTTPException, status
 from fastapi.staticfiles import StaticFiles
@@ -14,6 +15,7 @@ from passlib.context import CryptContext
 from starlette import status as st
 
 from sqlalchemy.orm import Session
+from sqlalchemy import update
 
 from hashlib import sha256
 
@@ -22,9 +24,12 @@ from SHWEBS import models, schemas
 from SHWEBS.config import settings
 from SHWEBS.schemas import TokenData
 
-SECRET_KEY = "5c8397d4a3885d6a0f08bed8154edfbf71e203473d6d30e2392779787b8eda51"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = 1 # 1 min
+REFRESH_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7 # 7 days
+SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
+# SECRET_KEY = os.environ['JWT_SECRET_KEY']
+# REFRESH_SECRET_KEY = os.environ['JWT_REFRESH_SECRET_KEY']
 
 
 models.Base.metadata.create_all(engine)
@@ -116,9 +121,9 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(),
         data={"sub": user.username}, expires_delta=access_token_expires
     )
 
-    user.active = True
+    session.query(models.User).filter(models.User.id==user.id). \
+        update({"is_active": True}, synchronize_session="fetch")
     session.commit()
-    session.refresh(user)
 
     return {"access_token": access_token, "token_type": "bearer"}
 
