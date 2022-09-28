@@ -1,21 +1,15 @@
 from typing import Tuple
 from datetime import datetime, timedelta
 from typing import Union
-import os
 
 from fastapi import FastAPI, Depends, Request, HTTPException, status
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from fastapi.responses import RedirectResponse
 
 from jose import JWTError, jwt
-from passlib.context import CryptContext
-
-from starlette import status as st
 
 from sqlalchemy.orm import Session
-from sqlalchemy import update
 
 from hashlib import sha256
 

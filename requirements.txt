@@ -8,4 +8,5 @@ pydub~=0.12.0
 pyaudio~=0.2.12
 jinja2
 python-multipart
+fastapi-jwt-auth[asymmetric]
 
