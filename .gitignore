@@ -102,3 +102,20 @@ dist
 
 # TernJS port file
 .tern-port
+
+# Jupyter cache
+*.ipynb_checkpoints
+note.ipynb
+
+# Python IDE cache
+.vscode
+*__pycache__
+
+# Passwords/keys
+secret_*
+
+# Apple cache
+.DS_Store
+
+# Database
+*.db
