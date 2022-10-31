@@ -65,7 +65,7 @@ async def registration(request: Request):
     )
 
 
-@app.post("/registration", response_model=schema.User)
+@app.post("/registration.css", response_model=schema.User)
 async def add_user(username: str,
                    password1: str,
                    password2: str,
