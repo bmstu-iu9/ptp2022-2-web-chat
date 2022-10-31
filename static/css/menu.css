@@ -1,0 +1,41 @@
+body{
+	padding: 0;
+	margin: 0;
+}
+
+.header{
+	background:#6F659C;
+	opacity: 0.92;
+}
+
+.imglogin{
+	width: 50px;
+	height: 50px;
+	padding-left: 10px;
+
+}
+
+.login{
+	background: #4C4375;
+	margin-left: 1150px;
+	padding-bottom: 20px;
+}
+
+.exit{
+	width: 50px;
+	height: 50px;
+	padding-top: 610px;
+	padding-left: 310px;
+	margin-bottom: 10px;
+}
+
+.new{
+	width: 50px;
+	height: 50px;
+	padding-left: 250px;
+}
+
+.up{
+	display: flex;
+	padding-top: 20px;
+}
