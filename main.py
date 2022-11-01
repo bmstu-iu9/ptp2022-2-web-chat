@@ -1,26 +1,37 @@
 from typing import Tuple
+from datetime import datetime, timedelta
+from typing import Union
 
-from fastapi import FastAPI, Depends, HTTPException
-from fastapi import FastAPI, Depends, Request, Form
+from fastapi import FastAPI, Depends, Request, HTTPException, status
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import RedirectResponse
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
-from starlette import status as st
+from jose import JWTError, jwt
 
 from sqlalchemy.orm import Session
 
 from hashlib import sha256
 
 from SHWEBS.database import engine, get_session
-from SHWEBS import models, schema
+from SHWEBS import models, schemas
 from SHWEBS.config import settings
+from SHWEBS.schemas import TokenData
+
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 1 # 1 min
+REFRESH_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7 # 7 days
+SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
+# SECRET_KEY = os.environ['JWT_SECRET_KEY']
+# REFRESH_SECRET_KEY = os.environ['JWT_REFRESH_SECRET_KEY']
 
 
 models.Base.metadata.create_all(engine)
 app = FastAPI()
 app.mount('/static', StaticFiles(directory='static'), name='static')
 templates = Jinja2Templates(directory='templates')
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
 @app.get("/")
@@ -35,22 +46,80 @@ async def home(request: Request):
     )
 
 
-@app.post("/token")
-async def login(username: str,
-                password: str,
-        session: Session = Depends(get_session)):
-    """Авторизация"""
+def create_access_token(data: dict, expires_delta: Union[timedelta, None] = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=15)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+
+@app.get("/get_user", response_model=schemas.User)
+async def get_user(username: str):
+    with Session(engine) as session:
+        user = session.query(models.User).filter_by(username=username).first()
+        if not user:
+            return None
+        return user
+
+
+@app.get("/auth_user", response_model=schemas.User)
+async def authenticate_user(username: str, password: str):
     hashed_password = sha256(password.encode()).hexdigest()
-    user = session.query(models.User).filter_by(username=username).first()
-
-
-    if not user:
+    user = await get_user(username=username)
+    if user is None:
         raise HTTPException(status_code=400, detail="User not found")
-    elif user.hashed_password != hashed_password:
+    if user.hashed_password != hashed_password:
         raise HTTPException(status_code=400, detail="Invalid password")
 
     return user
 
+
+@app.get("/users/me", response_model=schemas.User)
+async def get_current_user(token: str = Depends(oauth2_scheme)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+        token_data = TokenData(username=username)
+    except JWTError:
+        raise credentials_exception
+    user = await get_user(username=token_data.username)
+    if user is None:
+        raise credentials_exception
+    return user
+
+
+@app.post("/token")
+async def login(form_data: OAuth2PasswordRequestForm = Depends(),
+                session: Session = Depends(get_session)):
+    """Авторизация"""
+    user = await authenticate_user(form_data.username, form_data.password)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user.username}, expires_delta=access_token_expires
+    )
+
+    session.query(models.User).filter(models.User.id==user.id). \
+        update({"is_active": True}, synchronize_session="fetch")
+    session.commit()
+
+    return {"access_token": access_token, "token_type": "bearer"}
 
 
 @app.get("/registration")
@@ -65,7 +134,7 @@ async def registration(request: Request):
     )
 
 
-@app.post("/registration", response_model=schema.User)
+@app.post("/registration", response_model=schemas.User)
 async def add_user(username: str,
                    password1: str,
                    password2: str,
