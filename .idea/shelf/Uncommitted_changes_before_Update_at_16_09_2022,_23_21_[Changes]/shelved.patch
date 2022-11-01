@@ -1,0 +1,121 @@
+Index: SHWEBS/schema.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from pydantic import BaseModel\n\n\nclass User(BaseModel):\n    username: str\n    hashed_password: str\n    firstname: str\n    lastname: str\n\n    class Config:\n        orm_mode = True\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/SHWEBS/schema.py b/SHWEBS/schema.py
+--- a/SHWEBS/schema.py	(revision 1464a5f56ebc8235edfcfaa32a16eb0d1bd6f4f2)
++++ b/SHWEBS/schema.py	(date 1663351198046)
+@@ -2,10 +2,12 @@
+ 
+ 
+ class User(BaseModel):
++    id: int
+     username: str
+     hashed_password: str
+     firstname: str
+     lastname: str
++    active: bool
+ 
+     class Config:
+         orm_mode = True
+Index: SHWEBS/models.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from sqlalchemy.ext.declarative import declarative_base\nimport sqlalchemy as sa\n\n\nBase = declarative_base()\n\n\nclass User(Base):\n    __tablename__ = \"users\"\n\n    username = sa.Column(sa.String(20), primary_key=True)\n    hashed_password = sa.Column(sa.String(64), unique=False)\n    firstname = sa.Column(sa.String(20), unique=False)\n    lastname = sa.Column(sa.String(20), unique=False)\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/SHWEBS/models.py b/SHWEBS/models.py
+--- a/SHWEBS/models.py	(revision 1464a5f56ebc8235edfcfaa32a16eb0d1bd6f4f2)
++++ b/SHWEBS/models.py	(date 1663351198050)
+@@ -8,7 +8,9 @@
+ class User(Base):
+     __tablename__ = "users"
+ 
+-    username = sa.Column(sa.String(20), primary_key=True)
++    id = sa.Column(sa.Integer, primary_key=True)
++    username = sa.Column(sa.String(20), unique=True)
+     hashed_password = sa.Column(sa.String(64), unique=False)
+     firstname = sa.Column(sa.String(20), unique=False)
+     lastname = sa.Column(sa.String(20), unique=False)
++    active = sa.Column(sa.Boolean, default=False)
+Index: main.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from typing import Tuple\n\nfrom fastapi import FastAPI, Depends\nfrom sqlalchemy.orm import Session\n\nfrom hashlib import sha256\n\nfrom SHWEBS.database import engine, get_session\nfrom SHWEBS import models, schema\nfrom SHWEBS.config import settings\n\n\nmodels.Base.metadata.create_all(engine)\napp = FastAPI()\n\n\n@app.post(\"/\")\nasync def login(session: Session = Depends(get_session)):\n    \"\"\"Авторизация\"\"\"\n    raise NotImplementedError\n\n\n@app.post(\"/registration\", response_model=schema.User)\nasync def add_user(username: str,\n                   password1: str,\n                   password2: str,\n                   firstname: str,\n                   lastname: str,\n                   session: Session = Depends(get_session)):\n    \"\"\"Регистрация\"\"\"\n    def beautiful_parameters(username: str, firstname: str, lastname: str) -> Tuple[str, str, str]:\n        return username.lower(), firstname.lower().capitalize(), lastname.lower().capitalize()\n\n    username, firstname, lastname = beautiful_parameters(username, firstname, lastname)\n\n    if session.query(models.User).filter_by(username=username).count():\n        return None\n    if password1 != password2:\n        return None\n\n    hashed_password = sha256(password1.encode()).hexdigest()\n\n    new_user = models.User(username=username,\n                           hashed_password=hashed_password,\n                           firstname=firstname,\n                           lastname=lastname)\n\n    session.add(new_user)\n    session.commit()\n    session.refresh(new_user)\n\n    return new_user\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/main.py b/main.py
+--- a/main.py	(revision 1464a5f56ebc8235edfcfaa32a16eb0d1bd6f4f2)
++++ b/main.py	(date 1663359554234)
+@@ -1,6 +1,7 @@
++
+ from typing import Tuple
+ 
+-from fastapi import FastAPI, Depends
++from fastapi import FastAPI, Depends, HTTPException, status
+ from sqlalchemy.orm import Session
+ 
+ from hashlib import sha256
+@@ -14,11 +15,21 @@
+ app = FastAPI()
+ 
+ 
+-@app.post("/")
+-async def login(session: Session = Depends(get_session)):
++@app.post("/token")
++async def login(username: str,
++                password: str,
++        session: Session = Depends(get_session)):
+     """Авторизация"""
+-    raise NotImplementedError
++    hashed_password = sha256(password.encode()).hexdigest()
++    user = session.query(models.User).filter_by(username=username).first()
++
+ 
++    if not user:
++        raise HTTPException(status_code=400, detail="User not found")
++    elif user.hashed_password != hashed_password:
++        raise HTTPException(status_code=400, detail="Invalid password")
++
++    return user
+ 
+ @app.post("/registration", response_model=schema.User)
+ async def add_user(username: str,
+@@ -41,9 +52,9 @@
+     hashed_password = sha256(password1.encode()).hexdigest()
+ 
+     new_user = models.User(username=username,
+-                           hashed_password=hashed_password,
+-                           firstname=firstname,
+-                           lastname=lastname)
++                        hashed_password=hashed_password,
++                        firstname=firstname,
++                        lastname=lastname)
+ 
+     session.add(new_user)
+     session.commit()
+Index: .gitignore
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+># Logs\nlogs\n*.log\nnpm-debug.log*\nyarn-debug.log*\nyarn-error.log*\nlerna-debug.log*\n\n# Diagnostic reports (https://nodejs.org/api/report.html)\nreport.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json\n\n# Runtime data\npids\n*.pid\n*.seed\n*.pid.lock\n\n# Directory for instrumented libs generated by jscoverage/JSCover\nlib-cov\n\n# Coverage directory used by tools like istanbul\ncoverage\n*.lcov\n\n# nyc test coverage\n.nyc_output\n\n# Grunt intermediate storage (https://gruntjs.com/creating-plugins#storing-task-files)\n.grunt\n\n# Bower dependency directory (https://bower.io/)\nbower_components\n\n# node-waf configuration\n.lock-wscript\n\n# Compiled binary addons (https://nodejs.org/api/addons.html)\nbuild/Release\n\n# Dependency directories\nnode_modules/\njspm_packages/\n\n# TypeScript v1 declaration files\ntypings/\n\n# TypeScript cache\n*.tsbuildinfo\n\n# Optional npm cache directory\n.npm\n\n# Optional eslint cache\n.eslintcache\n\n# Microbundle cache\n.rpt2_cache/\n.rts2_cache_cjs/\n.rts2_cache_es/\n.rts2_cache_umd/\n\n# Optional REPL history\n.node_repl_history\n\n# Output of 'npm pack'\n*.tgz\n\n# Yarn Integrity file\n.yarn-integrity\n\n# dotenv environment variables file\n.env\n.env.test\n\n# parcel-bundler cache (https://parceljs.org/)\n.cache\n\n# Next.js build output\n.next\n\n# Nuxt.js build / generate output\n.nuxt\ndist\n\n# Gatsby files\n.cache/\n# Comment in the public line in if your project uses Gatsby and *not* Next.js\n# https://nextjs.org/blog/next-9-1#public-directory-support\n# public\n\n# vuepress build output\n.vuepress/dist\n\n# Serverless directories\n.serverless/\n\n# FuseBox cache\n.fusebox/\n\n# DynamoDB Local files\n.dynamodb/\n\n# TernJS port file\n.tern-port\n\n# Jupyter cache\n*.ipynb_checkpoints\nnote.ipynb\n\n# Python IDE cache\n.vscode\n*__pycache__\n\n# Passwords/keys\nsecret_*\n\n# Apple cache\n.DS_Store\n\n# Database\n*.db
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.gitignore b/.gitignore
+--- a/.gitignore	(revision 1464a5f56ebc8235edfcfaa32a16eb0d1bd6f4f2)
++++ b/.gitignore	(date 1662892263343)
+@@ -118,4 +118,6 @@
+ .DS_Store
+ 
+ # Database
+-*.db
+\ No newline at end of file
++*.db
++
++.idea
+\ No newline at end of file
