@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="dfff3057-5fa8-4893-ab0d-18f7ae52269d" name="Changes" comment=" [CHANGE] Change gitignore" />
+    <list default="true" id="dfff3057-5fa8-4893-ab0d-18f7ae52269d" name="Changes" comment=" [CHANGE] Change gitignore">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -180,7 +182,7 @@
       <workItem from="1663967701342" duration="26575000" />
       <workItem from="1666174778299" duration="200000" />
       <workItem from="1667254107652" duration="1353000" />
-      <workItem from="1667303949424" duration="3871000" />
+      <workItem from="1667303949424" duration="5492000" />
     </task>
     <task id="LOCAL-00001" summary="[ADD]Added login handler.">
       <created>1663360532580</created>
@@ -273,7 +275,14 @@
       <option name="project" value="LOCAL" />
       <updated>1667314119212</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary=" [CHANGE] Change gitignore">
+      <created>1667314519359</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1667314519359</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
