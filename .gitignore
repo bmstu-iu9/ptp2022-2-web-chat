@@ -121,4 +121,4 @@ secret_*
 *.db
 
 .idea
-.cfg
+pyvenv.cfg
