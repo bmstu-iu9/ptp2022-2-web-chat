@@ -122,5 +122,3 @@ secret_*
 
 .idea
 *.cfg
-lib
-bin
