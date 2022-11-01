@@ -119,3 +119,8 @@ secret_*
 
 # Database
 *.db
+
+.idea
+*.cfg
+lib
+bin

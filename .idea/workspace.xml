@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="dfff3057-5fa8-4893-ab0d-18f7ae52269d" name="Changes" comment=" [ADD] adding jwt tokens" />
+    <list default="true" id="dfff3057-5fa8-4893-ab0d-18f7ae52269d" name="Changes" comment=" [ADD] adding jwt tokens">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -180,6 +183,7 @@
       <workItem from="1663967701342" duration="26575000" />
       <workItem from="1666174778299" duration="200000" />
       <workItem from="1667254107652" duration="1353000" />
+      <workItem from="1667303949424" duration="2511000" />
     </task>
     <task id="LOCAL-00001" summary="[ADD]Added login handler.">
       <created>1663360532580</created>
@@ -268,7 +272,7 @@
                   <entry key="branch">
                     <value>
                       <list>
-                        <option value="origin/swich_postgres" />
+                        <option value="token" />
                       </list>
                     </value>
                   </entry>
